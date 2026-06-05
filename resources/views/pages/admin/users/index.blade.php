@@ -166,7 +166,7 @@
                                             </tr>
                                         @empty
                                             <tr id="empty-row">
-                                                <td colspan="8" class="text-center py-5 text-muted">
+                                                <td colspan="6" class="text-center py-5 text-muted">
                                                     <i class="ti ti-users f-40 d-block mb-2"></i>
                                                     No users found.
                                                 </td>
@@ -436,8 +436,8 @@
             <td class="user-email">${u.email}</td>
             <td class="user-phone">${phone}</td>
             <td><span class="badge ${u.role_badge} user-role-badge">${u.role_label}</span></td>
-            <td><span class="badge ${u.status_badge} user-status-badge">${cap(u.status)}</span></td>
-            <td class="user-joined">${u.created_at}</td>
+            {{-- <td><span class="badge ${u.status_badge} user-status-badge">${cap(u.status)}</span></td> --}}
+            {{-- <td class="user-joined">${u.created_at}</td> --}}
             <td class="text-end">
                 ${toggleBtn}
                 <button class="avtar avtar-xs btn-link-secondary btn-edit-user" data-id="${u.id}" title="Edit">
@@ -606,9 +606,9 @@
                         roleBadge.textContent = u.role_label;
                         roleBadge.className = `badge ${u.role_badge} user-role-badge`;
 
-                        const statusBadge = row.querySelector('.user-status-badge');
-                        statusBadge.textContent = cap(u.status);
-                        statusBadge.className = `badge ${u.status_badge} user-status-badge`;
+                        // const statusBadge = row.querySelector('.user-status-badge');
+                        // statusBadge.textContent = cap(u.status);
+                        // statusBadge.className = `badge ${u.status_badge} user-status-badge`;
 
                         const avatar = row.querySelector('.user-avatar');
                         avatar.textContent = u.name.charAt(0).toUpperCase();
@@ -665,11 +665,11 @@
 
                     // Update original DOM row (DT reads from it)
                     const row = document.getElementById(`user-row-${id}`);
-                    if (row) {
-                        const statusBadge = row.querySelector('.user-status-badge');
-                        statusBadge.textContent = cap(data.status);
-                        statusBadge.className = `badge ${data.status_badge} user-status-badge`;
-                    }
+                    // if (row) {
+                    //     const statusBadge = row.querySelector('.user-status-badge');
+                    //     statusBadge.textContent = cap(data.status);
+                    //     statusBadge.className = `badge ${data.status_badge} user-status-badge`;
+                    // }
 
                     // Update the visible button (it's in DT-rendered markup)
                     toggleBtn.className =
@@ -743,7 +743,7 @@
                     if (!document.querySelector('#users-tbody tr[id^="user-row-"]')) {
                         document.getElementById('users-tbody').innerHTML = `
                 <tr id="empty-row">
-                    <td colspan="8" class="text-center py-5 text-muted">
+                    <td colspan="6" class="text-center py-5 text-muted">
                         <i class="ti ti-users f-40 d-block mb-2"></i>
                         No users found.
                     </td>
