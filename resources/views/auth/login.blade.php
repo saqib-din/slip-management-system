@@ -7,7 +7,7 @@
                 <div class="card my-5">
                     <div class="card-body">
                         <div class="pt-0 pb-4 d-flex justify-content-center">
-                            <img src="{{ asset('assets/images/bella.png') }}" class="img-fluid"
+                            <img src="{{ asset('assets/images/old.jpeg') }}" class="img-fluid"
                                 alt="Bellamonte Resort App Logo" />
                         </div>
 

@@ -292,7 +292,7 @@
                                     <div class="d-flex align-items-start">
                                         <div class="me-3">
                                             <div class="user-upload wid-75">
-                                                <img src="{{ asset('assets/images/bella.png') }}" alt="Logo"
+                                                <img src="{{ asset('assets/images/old1.jpeg') }}" alt="Logo"
                                                     class="img-fluid" style="max-width:140px;" />
                                             </div>
                                         </div>

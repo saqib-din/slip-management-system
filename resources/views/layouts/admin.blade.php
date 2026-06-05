@@ -18,8 +18,8 @@
     <meta name="author" content="Bellamonte Resort" />
 
     {{-- Icon Agriculture App --}}
-    <link rel="shortcut icon" href="{{ asset('assets/images/bella.png') }}" />
-    <link rel="apple-touch-icon-precomposed" href="{{ asset('assets/images/bella.png') }}" />
+    <link rel="shortcut icon" href="{{ asset('assets/images/old1.jpeg') }}" />
+    <link rel="apple-touch-icon-precomposed" href="{{ asset('assets/images/old1.jpeg') }}" />
 
     {{-- [CSS Files] --}}
     <link rel="stylesheet" href="{{ asset('assets/css/plugins/style.css') }}" />
