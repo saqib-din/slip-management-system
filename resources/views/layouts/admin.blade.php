@@ -10,12 +10,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <meta name="description"
-        content="Bellamonte Resort Shogran offers luxury rooms, mountain views, hotel booking, family stays, and premium hospitality services in Shogran." />
+        content="Old City Sand Washing LLC provides premium sand washing, aggregate processing, and construction material supply services with reliable quality and timely delivery." />
 
     <meta name="keywords"
-        content="Bellamonte Resort, Shogran Hotel, luxury resort, hotel booking, mountain resort, family hotel, Shogran tourism, Pakistan hotels, vacation resort, rooms booking" />
+        content="Old City Sand Washing, sand washing, washed sand, construction sand, aggregate supplier, sand processing, construction materials, building materials, gravel supply, sand and gravel" />
 
-    <meta name="author" content="Bellamonte Resort" />
+    <meta name="author" content="Old City Sand Washing LLC" />
 
     {{-- Icon Agriculture App --}}
     <link rel="shortcut icon" href="{{ asset('assets/images/old.jpeg') }}" />
