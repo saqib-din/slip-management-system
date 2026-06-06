@@ -29,8 +29,11 @@
 
                     {{-- ACTION BUTTONS --}}
                     <div class="action-bar">
-                        <button class="btn-print" onclick="window.print()">
-                            🖨 Print
+                        <button class="btn-print" onclick="printSlip('full')">
+                            🖨 Print (Full Design)
+                        </button>
+                        <button class="btn-print-data" onclick="printSlip('data')">
+                            🖨 Print on Pre-Printed Form (Dot Matrix)
                         </button>
                         <a class="btn-pdf" href="{{ route('slips.pdf', $slip->id) }}">
                             ⬇ Download PDF
@@ -40,8 +43,10 @@
                         </a>
                     </div>
 
-                    {{-- PAPER --}}
-                    <div class="paper-wrapper">
+                    {{-- ========================================================= --}}
+                    {{--  SCREEN / PDF VIEW  (poora design, jaisa pehle tha)       --}}
+                    {{-- ========================================================= --}}
+                    <div class="paper-wrapper screen-view">
 
                         {{-- LEFT HOLES --}}
                         <div class="holes-strip">
@@ -201,11 +206,87 @@
 
                     </div>
 
+                    {{-- ========================================================= --}}
+                    {{--  PRINT-ONLY DATA OVERLAY  (sirf backend values)           --}}
+                    {{--  Ye sirf "Print on Pre-Printed Form" pe chhapega.         --}}
+                    {{--  Pre-printed kaghaz pe values theek baithane ke liye      --}}
+                    {{--  niche CSS me .print-overlay ke variables adjust karein.  --}}
+                    {{-- ========================================================= --}}
+                    <div class="print-overlay">
+                        <div class="po-page">
+
+                            {{-- Row 1: Serial No (left)  |  Date (right) --}}
+                            <span class="po"
+                                style="top: calc(var(--row1-top) + var(--shift-y)); left: calc(var(--col-left)  + var(--shift-x));">{{ $slip->slip_no }}</span>
+                            <span class="po"
+                                style="top: calc(var(--row1-top) + var(--shift-y)); left: calc(var(--col-right) + var(--shift-x));">{{ optional($slip->date)->format('Y-m-d') }}</span>
+
+                            {{-- Row 2: Site No (left)  |  Time (right) --}}
+                            <span class="po"
+                                style="top: calc(var(--row2-top) + var(--shift-y)); left: calc(var(--col-left)  + var(--shift-x));">{{ $slip->site_no }}</span>
+                            <span class="po"
+                                style="top: calc(var(--row2-top) + var(--shift-y)); left: calc(var(--col-right) + var(--shift-x));">{{ $slip->time }}</span>
+
+                            {{-- Row 3: LPO No (left)  |  Vehicle No (right) --}}
+                            <span class="po"
+                                style="top: calc(var(--row3-top) + var(--shift-y)); left: calc(var(--col-left)  + var(--shift-x));">{{ $slip->lpo_no }}</span>
+                            <span class="po"
+                                style="top: calc(var(--row3-top) + var(--shift-y)); left: calc(var(--col-right) + var(--shift-x));">{{ $slip->vehicle_no }}</span>
+
+                            {{-- Company Name --}}
+                            <span class="po"
+                                style="top: calc(var(--company-top) + var(--shift-y)); left: calc(var(--company-left) + var(--shift-x));">{{ $slip->company }}</span>
+
+                            {{-- Materials table rows --}}
+                            @php $items = $slip->items ?? []; @endphp
+                            @foreach ($items as $i => $item)
+                                @php $rowTop = "calc(var(--rows-top) + {$i} * var(--row-height) + var(--shift-y))"; @endphp
+                                <span class="po po-row"
+                                    style="top: {{ $rowTop }}; left: calc(var(--col-no)    + var(--shift-x));">{{ $i + 1 }}</span>
+                                <span class="po po-row"
+                                    style="top: {{ $rowTop }}; left: calc(var(--col-desc)  + var(--shift-x));">{{ $item['material'] ?? '' }}</span>
+                                <span class="po po-row"
+                                    style="top: {{ $rowTop }}; left: calc(var(--col-m3)    + var(--shift-x));">{{ $item['m3'] ?? '' }}</span>
+                                <span class="po po-row"
+                                    style="top: {{ $rowTop }}; left: calc(var(--col-ton)   + var(--shift-x));">{{ $item['ton'] ?? '' }}</span>
+                                <span class="po po-row"
+                                    style="top: {{ $rowTop }}; left: calc(var(--col-trips) + var(--shift-x));">{{ $item['trips'] ?? '' }}</span>
+                            @endforeach
+
+                            {{-- Tip (left)  |  Refund (right)  — labels samet, jaise PDF me hain --}}
+                            <span class="po po-name"
+                                style="top: calc(var(--totals-top) + var(--shift-y)); left: calc(var(--tip-left)    + var(--shift-x));">Tip
+                                : {{ $slip->tip > 0 ? $slip->tip : '' }}</span>
+                            <span class="po po-name"
+                                style="top: calc(var(--totals-top) + var(--shift-y)); left: calc(var(--refund-left) + var(--shift-x));">Refund
+                                : {{ $slip->refund ?? '' }}</span>
+
+                            {{-- Names: Rec. Name (left)  |  Driver's Name (right) --}}
+                            <span class="po po-name"
+                                style="top: calc(var(--names-top) + var(--shift-y)); left: calc(var(--recname-left) + var(--shift-x));">{{ $slip->receiver_name }}</span>
+                            <span class="po po-name"
+                                style="top: calc(var(--names-top) + var(--shift-y)); left: calc(var(--drvname-left) + var(--shift-x));">{{ $slip->driver }}</span>
+
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
         </div>
     </div>
+
+    <script>
+        // print mode select karta hai: 'full' (poora design) ya 'data' (sirf values)
+        function printSlip(mode) {
+            document.body.setAttribute('data-print-mode', mode);
+            window.print();
+        }
+        // print ke baad attribute hata dein
+        window.addEventListener('afterprint', function() {
+            document.body.removeAttribute('data-print-mode');
+        });
+    </script>
 @endsection
 
 @push('styles')
@@ -215,50 +296,40 @@
             display: flex;
             gap: 10px;
             margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-print,
+        .btn-print-data,
+        .btn-pdf,
+        .btn-back {
+            color: #fff;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
         }
 
         .btn-print {
             background: #0d6efd;
-            color: #fff;
-            border: none;
-            padding: 9px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        }
+
+        .btn-print-data {
+            background: #fd7e14;
         }
 
         .btn-pdf {
             background: #198754;
-            color: #fff;
-            border: none;
-            padding: 9px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            text-decoration: none;
         }
 
         .btn-back {
             background: #6c757d;
-            color: #fff;
-            border: none;
-            padding: 9px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            text-decoration: none;
         }
 
         /* ── PAPER WRAPPER ── */
@@ -325,14 +396,11 @@
         .company-name-ar {
             font-size: 27px;
             font-weight: bold;
-            /* direction: rtl; */
             color: #222;
             line-height: 1.4;
-            /* display:content; */
         }
 
         .company-name-en {
-
             font-size: 23px;
             font-weight: 700;
             color: #e8a020;
@@ -341,10 +409,8 @@
 
         .contact-info {
             font-weight: bold;
-
             text-align: right;
             font-size: 12.5px;
-            /* line-height: 1.7; */
             color: #333;
         }
 
@@ -487,7 +553,107 @@
             margin-left: 6px;
         }
 
-        /* ── PRINT ── */
+        /* ========================================================= */
+        /*  PRINT-ONLY DATA OVERLAY                                   */
+        /*  Screen pe hidden. Sirf "data" print mode me dikhega.     */
+        /* ========================================================= */
+        .print-overlay {
+            display: none;
+        }
+
+        .print-overlay .po-page {
+            position: relative;
+            /* === FORM KA SIZE === A4 portrait width. Height jaan boojh kar
+                   kam rakhi hai (content sirf upar wale hisse me hai) taake
+                   print 1 page se aage NA jaaye, chahe margins "Default" hon. */
+            width: 210mm;
+            height: 200mm;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #000;
+
+            /* ===========================================================
+                   CALIBRATION VARIABLES (mm me)
+                   -----------------------------------------------------------
+                   Ye coordinates aap ke "Old City Sand Washing.pdf" se
+                   exact nikale gaye hain, to print hubahu PDF jaisa aayega.
+                   Agar dot-matrix pe halka sa upar/neeche ya left/right ho:
+                     - SAARI values ek saath: sirf --shift-x / --shift-y badlein
+                     - Single field: us ka apna variable badlein
+                   =========================================================== */
+
+            /* Poori layer ko ek saath move karne ke liye: */
+            --shift-x: 0mm;
+            /* + = right,  - = left  */
+            --shift-y: 0mm;
+            /* + = neeche, - = upar  */
+
+            /* Left aur right columns (header info) */
+            --col-left: 39.6mm;
+            /* serial / site / lpo */
+            --col-right: 180.2mm;
+            /* date / time / vehicle */
+
+            /* Top info rows */
+            --row1-top: 32.9mm;
+            /* Serial No  |  Date */
+            --row2-top: 39.8mm;
+            /* Site No    |  Time */
+            --row3-top: 46.6mm;
+            /* LPO No     |  Vehicle No */
+
+            /* Company name line */
+            --company-top: 52.8mm;
+            --company-left: 50.3mm;
+
+            /* Materials table */
+            --rows-top: 70.8mm;
+            /* pehli row ki height */
+            --row-height: 9.7mm;
+            /* har row ke darmiyan gap (zaroorat ho to badlein) */
+            --col-no: 17.6mm;
+            --col-desc: 29.7mm;
+            --col-m3: 157.1mm;
+            --col-ton: 173.2mm;
+            --col-trips: 191.5mm;
+
+            /* Tip (left)  |  Refund (right) */
+            --totals-top: 103.5mm;
+            --tip-left: 27.9mm;
+            --refund-left: 182.6mm;
+
+            /* Names (Rec. Name  |  Driver's Name) */
+            --names-top: 112.8mm;
+            --recname-left: 43.5mm;
+            --drvname-left: 157.8mm;
+        }
+
+        .print-overlay .po {
+            position: absolute;
+            font-size: 11pt;
+            /* header info text */
+            line-height: 1;
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        .print-overlay .po-row {
+            font-size: 10.5pt;
+        }
+
+        /* table rows */
+        .print-overlay .po-name {
+            font-size: 9.5pt;
+        }
+
+        /* names */
+
+        /* ========================================================= */
+        /*  PRINT RULES                                              */
+        /* ========================================================= */
+
+        /* MODE: full design (default print + "Print Full Design" button) */
         @media print {
 
             .pc-sidebar,
@@ -524,6 +690,40 @@
             .pc-content {
                 padding: 0 !important;
                 margin: 0 !important;
+            }
+        }
+
+        /* MODE: data-only (pre-printed form / dot matrix) */
+        @media print {
+            body[data-print-mode="data"] .screen-view {
+                display: none !important;
+            }
+
+            /* position: FIXED => page ke bilkul top-left (0,0) se anchor,
+                   kisi parent (card/layout) ka offset asar nahi karega, isliye
+                   values exact wahi jagah aayengi jahan PDF me hain. */
+            body[data-print-mode="data"] .print-overlay {
+                display: block !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 210mm;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* page + body/html sab ka margin/padding 0 */
+            body[data-print-mode="data"],
+            html:has(body[data-print-mode="data"]) {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
             }
         }
     </style>
