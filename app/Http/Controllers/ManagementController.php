@@ -6,20 +6,17 @@ use App\Models\Company;
 use App\Models\Material;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ManagementController extends Controller
 {
     public function index()
     {
-        $companies = Company::orderBy('name')->get();
-        $materials = Material::orderBy('name')->get();
-        $totalUsers = User::count();
-
-        return view('pages.admin.management.index', compact(
-            'companies',
-            'materials',
-            'totalUsers'
-        ));
+        return Inertia::render('Management/Index', [
+            'companies'  => Company::orderBy('name')->get(['id', 'name']),
+            'materials'  => Material::orderBy('name')->get(['id', 'name']),
+            'totalUsers' => User::count(),
+        ]);
     }
 
     // ── Companies ──────────────────────────────────
@@ -28,9 +25,9 @@ class ManagementController extends Controller
     {
         $request->validate(['name' => 'required|string|unique:companies,name']);
 
-        $company = Company::create(['name' => trim($request->name)]);
+        Company::create(['name' => trim($request->name)]);
 
-        return response()->json($company);
+        return back()->with('success', 'Company added.');
     }
 
     public function updateCompany(Request $request, Company $company)
@@ -39,14 +36,14 @@ class ManagementController extends Controller
 
         $company->update(['name' => trim($request->name)]);
 
-        return response()->json($company->fresh());
+        return back()->with('success', 'Company updated.');
     }
 
     public function destroyCompany(Company $company)
     {
         $company->delete();
 
-        return response()->json(['success' => true]);
+        return back()->with('success', 'Company deleted.');
     }
 
     // ── Materials ──────────────────────────────────
@@ -55,9 +52,9 @@ class ManagementController extends Controller
     {
         $request->validate(['name' => 'required|string|unique:materials,name']);
 
-        $material = Material::create(['name' => trim($request->name)]);
+        Material::create(['name' => trim($request->name)]);
 
-        return response()->json($material);
+        return back()->with('success', 'Material added.');
     }
 
     public function updateMaterial(Request $request, Material $material)
@@ -66,13 +63,13 @@ class ManagementController extends Controller
 
         $material->update(['name' => trim($request->name)]);
 
-        return response()->json($material->fresh());
+        return back()->with('success', 'Material updated.');
     }
 
     public function destroyMaterial(Material $material)
     {
         $material->delete();
 
-        return response()->json(['success' => true]);
+        return back()->with('success', 'Material deleted.');
     }
 }

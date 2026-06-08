@@ -7,6 +7,7 @@ use App\Models\Material;
 use App\Models\User;
 use App\Models\Slip;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -17,7 +18,7 @@ class DashboardController extends Controller
         $totalCompany  = Company::count();
         $totalMaterial = Material::count();
 
-        return view('dashboard', compact(
+        return Inertia::render('Dashboard', compact(
             'totalUsers',
             'totalSlips',
             'totalCompany',

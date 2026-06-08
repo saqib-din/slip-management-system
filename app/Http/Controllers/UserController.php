@@ -6,18 +6,32 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::orderBy('role')->orderBy('name')->get();
-        return view('pages.admin.users.index', compact('users'));
+        $users = User::orderBy('role')->orderBy('name')->get()->map(fn($user) => [
+            'id'         => $user->id,
+            'name'       => $user->name,
+            'email'      => $user->email,
+            'phone'      => $user->phone,
+            'role'       => $user->role,
+            'role_label' => $user->getRoleLabel(),
+            'role_badge' => $user->getRoleBadgeClass(),
+            'status'     => $user->status,
+            'is_me'      => $user->id === auth()->id(),
+        ]);
+
+        return Inertia::render('Users/Index', [
+            'users' => $users,
+        ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
@@ -25,57 +39,26 @@ class UserController extends Controller
             'phone'    => 'nullable|string|max:20',
         ]);
 
-        $user = User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role'     => $validated['role'],
+        User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => $request->role,
             'status'   => 'active',
-            'phone'    => $validated['phone'] ?? null,
+            'phone'    => $request->phone,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User created successfully.',
-            'user'    => [
-                'id'         => $user->id,
-                'name'       => $user->name,
-                'email'      => $user->email,
-                'phone'      => $user->phone,
-                'role'       => $user->role,
-                'role_label' => $user->getRoleLabel(),
-                'role_badge' => $user->getRoleBadgeClass(),
-                'status'     => $user->status,
-                'status_badge' => $user->getStatusBadgeClass(),
-                'created_at' => $user->created_at->format('d M Y'),
-                'is_me'      => false,
-            ],
-        ]);
-    }
-
-    public function editData(User $user)
-    {
-        return response()->json([
-            'id'     => $user->id,
-            'name'   => $user->name,
-            'email'  => $user->email,
-            'role'   => $user->role,
-            'phone'  => $user->phone,
-            'status' => $user->status,
-        ]);
+        return back()->with('success', 'User created successfully.');
     }
 
     public function update(Request $request, User $user)
     {
-        // 
+        // Apni khud ki role change nahi kar sakte
         if ($user->id === auth()->id() && $request->role !== auth()->user()->role) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You cannot change your own role.',
-            ], 403);
+            return back()->withErrors(['role' => 'You cannot change your own role.']);
         }
 
-        $validated = $request->validate([
+        $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'role'     => 'required|in:admin,manager,user',
@@ -84,65 +67,42 @@ class UserController extends Controller
         ]);
 
         $data = [
-            'name'  => $validated['name'],
-            'email' => $validated['email'],
-            'role'  => $validated['role'],
-            'phone' => $validated['phone'] ?? null,
+            'name'  => $request->name,
+            'email' => $request->email,
+            'role'  => $request->role,
+            'phone' => $request->phone,
         ];
 
-        if (!empty($validated['password'])) {
-            $data['password'] = Hash::make($validated['password']);
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
         }
 
         $user->update($data);
-        $user->refresh();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully.',
-            'user'    => [
-                'id'           => $user->id,
-                'name'         => $user->name,
-                'email'        => $user->email,
-                'phone'        => $user->phone,
-                'role'         => $user->role,
-                'role_label'   => $user->getRoleLabel(),
-                'role_badge'   => $user->getRoleBadgeClass(),
-                'status'       => $user->status,
-                'status_badge' => $user->getStatusBadgeClass(),
-                'created_at'   => $user->created_at->format('d M Y'),
-            ],
-        ]);
+        return back()->with('success', 'User updated successfully.');
     }
 
     public function toggle(User $user)
     {
         if ($user->id === auth()->id()) {
-            return response()->json(['success' => false, 'message' => 'You cannot deactivate your own account.'], 403);
+            return back()->with('error', 'You cannot deactivate your own account.');
         }
 
         $user->update([
             'status' => $user->status === 'active' ? 'inactive' : 'active',
         ]);
 
-        $user->refresh();
-
-        return response()->json([
-            'success'      => true,
-            'message'      => 'User status updated.',
-            'status'       => $user->status,
-            'status_badge' => $user->getStatusBadgeClass(),
-        ]);
+        return back()->with('success', 'User status updated.');
     }
 
     public function destroy(User $user)
     {
         if ($user->id === auth()->id()) {
-            return response()->json(['success' => false, 'message' => 'You cannot delete your own account.'], 403);
+            return back()->with('error', 'You cannot delete your own account.');
         }
 
         $user->delete();
 
-        return response()->json(['success' => true, 'message' => 'User deleted.']);
+        return back()->with('success', 'User deleted.');
     }
 }
