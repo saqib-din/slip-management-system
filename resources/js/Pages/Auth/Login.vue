@@ -16,14 +16,16 @@
 
                         <form @submit.prevent="submit">
                             <div class="mb-3">
-                                <input type="email" class="form-control" placeholder="Email Address"
-                                    v-model="form.email" required autofocus autocomplete="username" />
+                                <input type="email" id="email" name="email" class="form-control"
+                                    placeholder="Email Address" v-model="form.email" required autofocus
+                                    autocomplete="username" />
                                 <span v-if="form.errors.email" class="text-danger">{{ form.errors.email }}</span>
                             </div>
 
                             <div class="mb-3">
-                                <input type="password" class="form-control" placeholder="Password"
-                                    v-model="form.password" required autocomplete="current-password" />
+                                <input type="password" id="password" name="password" class="form-control"
+                                    placeholder="Password" v-model="form.password" required
+                                    autocomplete="current-password" />
                                 <span v-if="form.errors.password" class="text-danger">{{ form.errors.password }}</span>
                             </div>
 
